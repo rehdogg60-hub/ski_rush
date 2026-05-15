@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Reh Dogg Games Plus | Shell Shock - Real Spinning Shells</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0f2a, #02030c);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'VT323', monospace;
+            padding: 20px;
+        }
+        .cabinet {
+            background: linear-gradient(145deg, #0f122e, #050714);
+            border-radius: 48px;
+            padding: 20px 24px 30px;
+            border: 3px solid #ffd966;
+            box-shadow: 0 0 0 6px #2a1e3a, 0 20px 40px black, inset 0 0 20px rgba(255, 217, 0, 0.3);
+            max-width: 750px;
+            width: 100%;
+        }
+        .marquee {
+            text-align: center;
+            background: #010a15;
+            border-radius: 24px;
+            padding: 12px;
+            margin-bottom: 24px;
+            border-bottom: 3px solid #ffcc44;
+            box-shadow: inset 0 0 12px gold, 0 6px 0 #3a2e1a;
+        }
+        .logo {
+            font-size: clamp(1.2rem, 5vw, 2rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffd966, #ffaa33, #ff5500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            color: #7ffbff;
+            font-size: 0.75rem;
+            margin-top: 6px;
+        }
+        .score-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: #030a1acc;
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            padding: 8px 12px;
+            flex: 1;
+            text-align: center;
+            border: 1px solid #ffd966;
+            box-shadow: 0 5px 0 #001e2a;
+        }
+        .card-label {
+            font-size: 0.7rem;
+            color: #8dd0ff;
+        }
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd966;
+            text-shadow: 0 0 8px #ffaa33;
+        }
+        /* Shell Arena */
+        .arena {
+            position: relative;
+            min-height: 200px;
+            margin: 20px 0;
+        }
+        .slot-row {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            position: relative;
+            z-index: 5;
+        }
+        .slot {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        /* Real half‑shell */
+        .shell {
+            position: absolute;
+            bottom: 0;
+            width: 110px;
+            height: 90px;
+            background: radial-gradient(ellipse at 35% 30%, #e6b87e, #b56a2e, #7a4012);
+            border-radius: 50% 50% 45% 45% / 60% 60% 25% 25%;
+            box-shadow: 0 12px 12px rgba(0,0,0,0.4), inset 0 2px 6px rgba(255,230,160,0.8);
+            cursor: pointer;
+            transition: transform 0.08s linear;
+            will-change: transform;
+            border-bottom: 3px solid #5a2a0a;
+        }
+        .shell::before {
+            content: "";
+            position: absolute;
+            top: 8px;
+            left: 15%;
+            width: 70%;
+            height: 28%;
+            background: radial-gradient(ellipse, rgba(255,240,170,0.7), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .shell::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 20%;
+            width: 60%;
+            height: 14px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 50%;
+            filter: blur(4px);
+            pointer-events: none;
+        }
+        .ball-icon {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.2rem;
+            display: none;
+            filter: drop-shadow(0 4px 4px black);
+            pointer-events: none;
+            z-index: 10;
+        }
+        .shell.active .ball-icon {
+            display: block;
+        }
+        /* Shell game sliding animation */
+        .shell.sliding {
+            z-index: 20;
+            will-change: transform, left, top;
+        }
+        .shell.sliding-under {
+            z-index: 10;
+        }
+        /* Subtle wobble on landing */
+        @keyframes shellSettle {
+            0%   { transform: rotate(0deg) scaleX(1); }
+            20%  { transform: rotate(-2deg) scaleX(0.97); }
+            50%  { transform: rotate(1.5deg) scaleX(1.02); }
+            75%  { transform: rotate(-0.8deg) scaleX(0.99); }
+            100% { transform: rotate(0deg) scaleX(1); }
+        }
+        .shell.settling {
+            animation: shellSettle 0.22s ease-out;
+        }
+        .message-area {
+            background: #021a24aa;
+            border-radius: 60px;
+            padding: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid cyan;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .arcade-btn {
+            background: #1f1a2e;
+            border: none;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 12px 28px;
+            border-radius: 60px;
+            color: #ffdf8c;
+            box-shadow: 0 6px 0 #2a1a3a;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .arcade-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2a1a3a;
+        }
+        @media (max-width: 550px) {
+            .slot { width: 90px; }
+            .shell { width: 82px; height: 68px; }
+            .ball-icon { font-size: 1.6rem; bottom: 12px; }
+            .card-value { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="cabinet">
+    <div class="marquee"><div class="logo">🔥 REH DOGG: SHELL SHOCK 🔥</div><div class="sub">⚡ SPINNING SHELLS · TRACK THE BALL ⚡</div></div>
+    <div class="score-panel">
+        <div class="card"><div class="card-label">🎲 SCORE</div><div class="card-value" id="scoreDisplay">0</div></div>
+        <div class="card"><div class="card-label">🏆 HIGH SCORE</div><div class="card-value" id="highScoreDisplay">0</div></div>
+        <div class="card"><div class="card-label">🎯 STREAK</div><div class="card-value" id="streakDisplay">0</div></div>
+    </div>
+    <div class="arena">
+        <div class="slot-row" id="slotRow">
+            <div class="slot" data-slot="0"></div>
+            <div class="slot" data-slot="1"></div>
+            <div class="slot" data-slot="2"></div>
+        </div>
+    </div>
+    <div class="message-area" id="gameMessage"><span class="message-text">🕹️ PRESS START TO PLAY 🕹️</span></div>
+    <div class="controls"><button class="arcade-btn" id="startBtn">🌀 START GAME</button><button class="arcade-btn" id="resetBtn">🔄 RESET SCORE</button></div>
+</div>
+<script>
+(function(){
+    // ---------- SIMPLE AUDIO ----------
+    const SafeAudio = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null, soundEnabled = true;
+    function initAudio() { if(!SafeAudio){ soundEnabled=false; return; } if(!audioCtx) audioCtx=new SafeAudio(); if(audioCtx.state==='suspended') audioCtx.resume(); }
+    function beep(f=880,d=0.12,v=0.2) { if(!audioCtx||!soundEnabled) return; try{ const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value=f; g.gain.value=v; o.type='sine'; o.start(); g.gain.exponentialRampToValueAtTime(0.00001,audioCtx.currentTime+d); o.stop(audioCtx.currentTime+d); }catch(e){} }
+    function win() { beep(880,0.1); setTimeout(()=>beep(1100,0.12),80); setTimeout(()=>beep(1320,0.15),160); }
+    function lose() { beep(440,0.2); setTimeout(()=>beep(330,0.25),150); }
+    function swapSound() { beep(660,0.07); setTimeout(()=>beep(550,0.07),70); }
+    // ---------- STORAGE ----------
+    const KEY='rehdogg_shell_high';
+    function loadHigh(){ try{ return parseInt(localStorage.getItem(KEY),10)||0; }catch(e){ return 0; } }
+    function saveHigh(v){ try{ localStorage.setItem(KEY,String(v)); }catch(e){} }
+    // ---------- DOM ----------
+    const slots = document.querySelectorAll('.slot');
+    let shells = []; // each: {dom, slotIndex, hasBall, id}
+    let nextId = 0;
+    let score = 0, high = 0, streak = 0;
+    let gameActive = false, shuffling = false;
+    let autoTimer = null;
+    let ballShellId = null;
+    const scoreEl = document.getElementById('scoreDisplay');
+    const highEl = document.getElementById('highScoreDisplay');
+    const streakEl = document.getElementById('streakDisplay');
+    const msgSpan = document.querySelector('#gameMessage .message-text');
+    function msg(txt, col="#0ff") { if(msgSpan){ msgSpan.innerHTML=txt; msgSpan.style.color=col; } }
+    function updateUI() {
+        scoreEl.innerText = score;
+        streakEl.innerText = streak;
+        if(score > high) { high = score; highEl.innerText = high; saveHigh(high); }
+    }
+    // ---------- CREATE SHELLS ----------
+    function createShell(slotIdx) {
+        const shellDiv = document.createElement('div');
+        shellDiv.className = 'shell';
+        const ballSpan = document.createElement('span');
+        ballSpan.className = 'ball-icon';
+        ballSpan.textContent = '⚾';
+        shellDiv.appendChild(ballSpan);
+        slots[slotIdx].appendChild(shellDiv);
+        const id = nextId++;
+        const obj = { dom: shellDiv, slotIndex: slotIdx, hasBall: false, id: id };
+        shellDiv.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            if(!gameActive || shuffling) return;
+            pickShell(obj.id);
+        });
+        return obj;
+    }
+    function rebuildShells() {
+        slots.forEach(s => s.innerHTML = '');
+        shells = [];
+        nextId = 0;
+        for(let i=0; i<3; i++) shells.push(createShell(i));
+    }
+    // ---------- AUTHENTIC SHELL-GAME SLIDE ----------
+    // Easing: fast-in, slight deceleration at end (dealer flick)
+    function easeShell(t) {
+        // Quick acceleration, smooth stop — like a dealer's practiced push
+        return t === 1 ? 1 : 1 - Math.pow(2, -8 * t);
+    }
+    // Lateral offset so crossing shells pass in front/behind each other
+    // instead of colliding head-on
+    function swapShells(shellA, shellB, duration, onDone) {
+        if(shellA.id === shellB.id) { if(onDone) onDone(); return; }
+        const slotA = shellA.slotIndex;
+        const slotB = shellB.slotIndex;
+        const arena = document.querySelector('.arena');
+        const arenaRect = arena.getBoundingClientRect();
+
+        function centerOf(slot) {
+            const r = slots[slot].getBoundingClientRect();
+            return {
+                x: r.left + r.width / 2 - arenaRect.left,
+                y: r.top  + r.height/ 2 - arenaRect.top
+            };
+        }
+
+        const posA = centerOf(slotA);
+        const posB = centerOf(slotB);
+
+        // Shells slide flat on the table — Y stays constant except for a
+        // small lateral weave so they don't clip. One goes slightly forward
+        // (toward viewer = lower y), the other slightly back.
+        const laneOffset = 16; // px vertical separation when crossing mid-point
+        const domA = shellA.dom;
+        const domB = shellB.dom;
+
+        // Detach both from slots and place absolutely in the arena
+        function attachToArena(dom, cx, cy) {
+            const w = dom.offsetWidth  || 110;
+            const h = dom.offsetHeight || 90;
+            dom.style.position   = 'absolute';
+            dom.style.left       = (cx - w/2) + 'px';
+            dom.style.top        = (cy - h/2) + 'px';
+            dom.style.width      = w + 'px';
+            dom.style.height     = h + 'px';
+            dom.style.transition = 'none';
+            dom.style.transform  = '';
+            arena.appendChild(dom);
+        }
+
+        attachToArena(domA, posA.x, posA.y);
+        attachToArena(domB, posB.x, posB.y);
+
+        domA.classList.add('sliding');
+        domB.classList.add('sliding-under');
+
+        swapSound();
+
+        const wA = domA.offsetWidth  || 110;
+        const hA = domA.offsetHeight || 90;
+        const wB = domB.offsetWidth  || 110;
+        const hB = domB.offsetHeight || 90;
+
+        const startTime = performance.now();
+
+        function step(now) {
+            let t = Math.min(1, (now - startTime) / duration);
+            const e = easeShell(t);
+
+            // Lateral weave: a sine bump that peaks at the crossing midpoint.
+            // Shell A swings slightly forward, B slightly backward.
+            const sway = Math.sin(t * Math.PI) * laneOffset;
+
+            // Shell A: slides from A→B position with a forward (negative Y) lane
+            const curXA = posA.x + (posB.x - posA.x) * e;
+            const curYA = posA.y + (posB.y - posA.y) * e - sway;
+            // Subtle scaleX squeeze at peak speed to imply motion blur
+            const squish = 1 + Math.sin(t * Math.PI) * 0.06;
+
+            // Shell B: slides from B→A with a rearward lane
+            const curXB = posB.x + (posA.x - posB.x) * e;
+            const curYB = posB.y + (posA.y - posB.y) * e + sway;
+
+            domA.style.left = (curXA - wA/2) + 'px';
+            domA.style.top  = (curYA - hA/2) + 'px';
+            domA.style.transform = `scaleX(${squish})`;
+
+            domB.style.left = (curXB - wB/2) + 'px';
+            domB.style.top  = (curYB - hB/2) + 'px';
+            domB.style.transform = `scaleX(${squish})`;
+
+            if(t < 1) {
+                requestAnimationFrame(step);
+            } else {
+                // Re-attach to destination slots
+                const clearInline = (dom) => {
+                    dom.style.position  = '';
+                    dom.style.left      = '';
+                    dom.style.top       = '';
+                    dom.style.width     = '';
+                    dom.style.height    = '';
+                    dom.style.transform = '';
+                };
+                slots[slotB].appendChild(domA);
+                slots[slotA].appendChild(domB);
+                clearInline(domA);
+                clearInline(domB);
+                domA.classList.remove('sliding');
+                domB.classList.remove('sliding-under');
+                // Tiny settle wobble on landing
+                domA.classList.add('settling');
+                domB.classList.add('settling');
+                domA.addEventListener('animationend', () => domA.classList.remove('settling'), {once:true});
+                domB.addEventListener('animationend', () => domB.classList.remove('settling'), {once:true});
+                shellA.slotIndex = slotB;
+                shellB.slotIndex = slotA;
+                if(onDone) onDone();
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    // Shuffle with acceleration: early swaps slower, later ones faster.
+    // Occasionally runs two swaps in parallel (different shell pairs) for
+    // the blurring confusion a real dealer creates.
+    let roundNumber = 0; // increments each startRound to speed up over time
+
+    function shuffleSequence(steps, onComplete) {
+        if(steps <= 0) { if(onComplete) onComplete(); return; }
+
+        // Speed: starts at 420ms, ramps down to 160ms based on roundNumber
+        const baseMs  = Math.max(160, 420 - roundNumber * 18);
+        // Variance: each swap slightly randomises duration ±20%
+        function swapDur() { return baseMs * (0.82 + Math.random() * 0.38); }
+
+        let left = steps;
+        let running = 0;
+
+        function tryNext() {
+            if(left <= 0 && running === 0) { if(onComplete) onComplete(); return; }
+            if(left <= 0) return;
+
+            // Decide if we can fire two simultaneous swaps (needs ≥2 left,
+            // and all 3 shells must be free — only safe when swapping
+            // non-overlapping pairs, which with 3 shells means pairs (0,1)
+            // and we'd need a 4th shell; so we only do parallel on the same
+            // pair but with a staggered start to give a "quick double" feel).
+            left--;
+            running++;
+
+            let a = Math.floor(Math.random() * shells.length);
+            let b = Math.floor(Math.random() * shells.length);
+            while(a === b) b = Math.floor(Math.random() * shells.length);
+
+            const dur = swapDur();
+            swapShells(shells[a], shells[b], dur, () => {
+                running--;
+                tryNext();
+            });
+
+            // At faster speeds, fire the next swap slightly before this one
+            // finishes — creates overlapping motion blur effect
+            if(left > 0 && dur < 280) {
+                const overlap = dur * 0.55; // start next when 55% through current
+                setTimeout(() => {
+                    if(left > 0) tryNext();
+                }, overlap);
+            }
+        }
+
+        tryNext();
+    }
+    // ---------- GAME ROUND ----------
+    function startRound() {
+        if(shuffling) return;
+        clearTimeout(autoTimer);
+        gameActive = false;
+        // reset highlights
+        shells.forEach(s => s.dom.classList.remove('active'));
+        // place ball under random shell
+        const randomIdx = Math.floor(Math.random() * shells.length);
+        ballShellId = shells[randomIdx].id;
+        shells.forEach(s => s.hasBall = (s.id === ballShellId));
+        const ballShell = shells.find(s => s.hasBall);
+        ballShell.dom.classList.add('active');
+        msg("👀 WATCH THE SHELL WITH THE BALL... 👀", "#7ffbff");
+        setTimeout(() => {
+            // hide ball
+            shells.forEach(s => s.dom.classList.remove('active'));
+            msg("🌀 WATCH THE SHELLS SPIN! 🌀", "#ffd966");
+            shuffling = true;
+            roundNumber++;
+            // More swaps as rounds increase, capped at 22
+            const swaps = Math.min(22, 10 + Math.floor(roundNumber * 0.8) + Math.floor(Math.random() * 5));
+            shuffleSequence(swaps, () => {
+                shuffling = false;
+                gameActive = true;
+                msg("🎯 PICK A SHELL! 🎯", "#ffd966");
+                // glow effect
+                shells.forEach(s => s.dom.style.filter = "drop-shadow(0 0 8px gold)");
+                setTimeout(() => shells.forEach(s => s.dom.style.filter = ""), 700);
+            });
+        }, 1400);
+    }
+    function pickShell(shellId) {
+        if(!gameActive || shuffling) return;
+        gameActive = false;
+        const chosen = shells.find(s => s.id === shellId);
+        const ballShell = shells.find(s => s.hasBall);
+        ballShell.dom.classList.add('active');
+        if(chosen.hasBall) {
+            const points = 10 + (streak * 2);
+            score += points;
+            streak++;
+            updateUI();
+            win();
+            msg(`🎉 CORRECT! +${points} POINTS! STREAK ${streak}! 🎉`, "#8cff4f");
+            autoTimer = setTimeout(() => startRound(), 1400);
+        } else {
+            streak = 0;
+            updateUI();
+            lose();
+            msg(`❌ WRONG! BALL WAS UNDER SHELL ${ballShell.slotIndex+1}. ❌`, "#ff7777");
+            autoTimer = setTimeout(() => startRound(), 1800);
+        }
+    }
+    function resetScore() {
+        clearTimeout(autoTimer);
+        if(shuffling) return;
+        score = 0; streak = 0;
+        updateUI();
+        gameActive = false;
+        shells.forEach(s => s.dom.classList.remove('active'));
+        msg("✨ SCORE RESET! PRESS START ✨", "#ffd966");
+    }
+    function startGame() {
+        if(shuffling) return;
+        initAudio();
+        clearTimeout(autoTimer);
+        score = 0; streak = 0; roundNumber = 0;
+        updateUI();
+        rebuildShells();   // fresh positions
+        startRound();
+    }
+    // ---------- BIND ----------
+    document.getElementById('startBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); startGame(); });
+    document.getElementById('resetBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); initAudio(); resetScore(); });
+    // initial
+    rebuildShells();
+    high = loadHigh();
+    highEl.innerText = high;
+    updateUI();
+    msg("🕹️ PRESS START GAME 🕹️", "#0ff");
+    document.body.addEventListener('pointerdown', () => { if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }, { once: true });
+})();
+</script>
+</body>
+</html>
