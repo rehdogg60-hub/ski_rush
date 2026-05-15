@@ -506,13 +506,46 @@
             updateUI();
             win();
             msg(`🎉 CORRECT! +${points} POINTS! STREAK ${streak}! 🎉`, "#8cff4f");
-            autoTimer = setTimeout(() => startRound(), 1400);
-        } else {
-            streak = 0;
-            updateUI();
-            lose();
-            msg(`❌ WRONG! BALL WAS UNDER SHELL ${ballShell.slotIndex+1}. ❌`, "#ff7777");
-            autoTimer = setTimeout(() => startRound(), 1800);
+            autoTimer = setTimeout(() => startRound(), else {
+
+    if(typeof misses==="undefined"){
+        misses=0;
+    }
+
+    misses++;
+
+    streak=0;
+
+    updateUI();
+
+    lose();
+
+    if(misses>=3){
+
+        msg(
+        "💀 GAME OVER - PRESS START 💀",
+        "#ff4444"
+        );
+
+        gameActive=false;
+
+        clearTimeout(autoTimer);
+
+        return;
+    }
+
+    msg(
+    `❌ WRONG! ${3-misses} CHANCES LEFT ❌`,
+    "#ff7777"
+    );
+
+    autoTimer=
+    setTimeout(
+    ()=>startRound(),
+    1800
+    );
+
+}
         }
     }
     function resetScore() {
@@ -528,7 +561,10 @@
         if(shuffling) return;
         initAudio();
         clearTimeout(autoTimer);
-        score = 0; streak = 0; roundNumber = 0;
+        score = 0;
+streak = 0;
+misses = 0;
+roundNumber = 0;
         updateUI();
         rebuildShells();   // fresh positions
         startRound();
