@@ -780,7 +780,39 @@
         ctx.shadowBlur = 0;
       }
 
-      function drawSkier() {
+      const skierImg = new Image();
+skierImg.src = 'images/player_skier.png';
+
+function drawSkier() {
+  const x = skierX;
+  const y = skierY;
+
+  const lean =
+    keys['ArrowLeft'] ? -0.12 :
+    keys['ArrowRight'] ? 0.12 : 0;
+
+  ctx.save();
+
+  ctx.translate(x + SKIER_W / 2, y + SKIER_H / 2);
+  ctx.rotate(lean);
+
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.ellipse(0, SKIER_H / 2 + 4, 10, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // skier image
+  ctx.drawImage(
+    skierImg,
+    -SKIER_W / 2,
+    -SKIER_H / 2,
+    SKIER_W,
+    SKIER_H
+  );
+
+  ctx.restore();
+}
         ctx.save();
         ctx.translate(player.x, player.y);
         const lean = player.vx * 0.028;
