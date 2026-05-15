@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ski Rush - Reh Dogg Games Plus</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      touch-action: none;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(0, 255, 255, 0.28), transparent 18%),
+        radial-gradient(circle at 80% 8%, rgba(255, 44, 185, 0.28), transparent 16%),
+        linear-gradient(180deg, #04142e 0%, #0b1f4b 45%, #020611 100%);
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 10px;
+    }
+
+    #gameShell {
+      width: min(100vw, 650px);
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .brand {
+      width: min(100%, 560px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 2px solid rgba(117, 244, 255, 0.75);
+      border-radius: 16px;
+      background: rgba(0, 8, 26, 0.78);
+      box-shadow: 0 0 24px rgba(0, 255, 255, 0.35), inset 0 0 18px rgba(255, 255, 255, 0.08);
+    }
+
+    .brand strong {
+      color: #ffe76b;
+      font-size: clamp(18px, 4vw, 30px);
+      line-height: 1;
+      text-transform: uppercase;
+      text-shadow: 0 3px 0 #08345e, 0 0 16px rgba(255, 231, 107, 0.92);
+    }
+
+    .brand span {
+      color: #85f7ff;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .canvasWrap {
+      position: relative;
+      width: min(96vw, 520px);
+      height: min(96vw, 520px);
+      max-height: calc(100dvh - 170px);
+      aspect-ratio: 1;
+      border-radius: 20px;
+      padding: 8px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.7), transparent 20%),
+        linear-gradient(180deg, #ff2cc1, #20f6ff 45%, #ffe76b);
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.42), 0 0 28px rgba(32, 246, 255, 0.55);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 14px;
+      background: #dffaff;
+      box-shadow: inset 0 0 34px rgba(4, 20, 46, 0.35);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 8px;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      text-align: center;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.42), transparent 20%),
+        radial-gradient(circle at 18% 88%, rgba(255, 44, 185, 0.42), transparent 24%),
+        linear-gradient(180deg, rgba(4, 16, 46, 0.94), rgba(0, 5, 18, 0.97));
+    }
+
+    .overlay.hidden { display: none; }
+
+    .menuCard {
+      width: min(100%, 430px);
+      padding: 24px 18px;
+      border: 2px solid rgba(133, 247, 255, 0.8);
+      border-radius: 24px;
+      background: rgba(0, 13, 37, 0.82);
+      box-shadow: 0 0 28px rgba(32, 246, 255, 0.48), inset 0 0 28px rgba(255, 255, 255, 0.08);
+    }
+
+    h1 {
+      margin: 0;
+      color: #ffe76b;
+      font-size: clamp(44px, 12vw, 70px);
+      line-height: 0.86;
+      text-transform: uppercase;
+      text-shadow: 0 5px 0 #0b3b75, 0 0 18px rgba(255, 231, 107, 0.95);
+    }
+
+    h2 {
+      margin: 12px 0 8px;
+      color: #85f7ff;
+      font-size: clamp(16px, 4vw, 24px);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 12px rgba(32, 246, 255, 0.9);
+    }
+
+    p {
+      margin: 10px auto;
+      color: #e9feff;
+      font-weight: 800;
+      line-height: 1.42;
+    }
+
+    button {
+      width: min(100%, 300px);
+      min-height: 50px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 999px;
+      color: #04142e;
+      font-weight: 1000;
+      font-size: 17px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: linear-gradient(#fff79a, #ffb12f);
+      box-shadow: 0 5px 0 #8e4f00, 0 0 22px rgba(255, 231, 107, 0.62);
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    button:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #8e4f00, 0 0 22px rgba(255, 231, 107, 0.82);
+    }
+
+    .controls {
+      width: min(96vw, 520px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .touchBtn {
+      min-height: 58px;
+      border: 2px solid rgba(255, 255, 255, 0.52);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(32, 246, 255, 0.82), rgba(22, 100, 255, 0.82));
+      color: #fff;
+      font-size: 20px;
+      font-weight: 1000;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 5px 0 #003a82, 0 0 18px rgba(32, 246, 255, 0.52);
+      touch-action: none;
+    }
+
+    .touchBtn.active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #003a82, 0 0 28px rgba(255, 231, 107, 0.8);
+      background: linear-gradient(180deg, #ffe76b, #ff2cc1);
+    }
+
+    @media (max-height: 700px) {
+      .brand { padding: 6px 10px; }
+      .controls { gap: 8px; }
+      .touchBtn { min-height: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="gameShell">
+    <section class="brand">
+      <div>
+        <span>Reh Dogg Games Plus Arcade</span><br />
+        <strong>Ski Rush</strong>
+      </div>
+      <span id="miniHud">Level 1</span>
+    </section>
+
+    <section class="canvasWrap">
+      <canvas id="game" width="520" height="520"></canvas>
+
+      <div id="startScreen" class="overlay">
+        <div class="menuCard">
+          <h1>Ski Rush</h1>
+          <h2>Neon Snow Arcade</h2>
+          <p>Carve through glowing slopes, grab stars, survive ice patches, and outrun avalanche warnings.</p>
+          <p>Controls: Arrow Keys / A D / Touch Buttons</p>
+          <button id="startBtn">Start Rush</button>
+        </div>
+      </div>
+
+      <div id="gameOverScreen" class="overlay hidden">
+        <div class="menuCard">
+          <h1>Crash!</h1>
+          <h2>Final Score: <span id="finalScore">0</span></h2>
+          <p>The mountain got loud. Hit replay and show the slope who runs it.</p>
+          <button id="restartBtn">Play Again</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Mobile controls">
+      <div id="leftBtn" class="touchBtn">&lt; LEFT</div>
+      <div id="rightBtn" class="touchBtn">RIGHT &gt;</div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+      const startScreen = document.getElementById("startScreen");
+      const gameOverScreen = document.getElementById("gameOverScreen");
+      const startBtn = document.getElementById("startBtn");
+      const restartBtn = document.getElementById("restartBtn");
+      const finalScore = document.getElementById("finalScore");
+      const miniHud = document.getElementById("miniHud");
+      const leftBtn = document.getElementById("leftBtn");
+      const rightBtn = document.getElementById("rightBtn");
+
+      const W = 520;
+      const H = 520;
+      const themeMusicPath = "assets/audio/ski_rush_theme.mp3";
+      const keys = { left: false, right: false };
+      const audio = { ctx: null, unlocked: false, theme: null };
+
+      const player = {
+        x: W / 2,
+        y: H - 78,
+        vx: 0,
+        width: 26,
+        height: 36,
+        shield: 0,
+        invuln: 0
+      };
+
+      const state = {
+        mode: "title",
+        score: 0,
+        best: Number(localStorage.getItem("skiRushBest") || 0),
+        level: 1,
+        distance: 0,
+        speed: 3.2,
+        spawnTimer: 0,
+        pickupTimer: 120,
+        shake: 0,
+        avalanche: 0,
+        avalancheCooldown: 650,
+        levelBanner: 0,
+        levelBannerText: "",
+        crashFlash: 0,
+        snowOffset: 0,
+        obstacles: [],
+        pickups: [],
+        icePatches: [],
+        particles: [],
+        floaters: [],
+        laneGlow: []
+      };
+
+      function unlockAudio() {
+        if (audio.unlocked) return;
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audio.ctx = audio.ctx || new AC();
+        if (audio.ctx.state === "suspended") audio.ctx.resume();
+        audio.unlocked = true;
+
+        // Clean future music slot for a Suno theme. If the file is missing, the game stays silent.
+        audio.theme = new Audio(themeMusicPath);
+        audio.theme.loop = true;
+        audio.theme.volume = 0.22;
+      }
+
+      function tone(freq, duration, type = "sine", gain = 0.05, endFreq = null, delay = 0) {
+        if (!audio.ctx) return;
+        const now = audio.ctx.currentTime + delay;
+        const osc = audio.ctx.createOscillator();
+        const g = audio.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (endFreq) osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + duration);
+        g.gain.setValueAtTime(gain, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.connect(g).connect(audio.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.03);
+      }
+
+      function noise(duration, gain = 0.04, filterFreq = 900) {
+        if (!audio.ctx) return;
+        const len = Math.floor(audio.ctx.sampleRate * duration);
+        const buffer = audio.ctx.createBuffer(1, len, audio.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        const src = audio.ctx.createBufferSource();
+        const filter = audio.ctx.createBiquadFilter();
+        const g = audio.ctx.createGain();
+        src.buffer = buffer;
+        filter.type = "bandpass";
+        filter.frequency.value = filterFreq;
+        g.gain.setValueAtTime(gain, audio.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audio.ctx.currentTime + duration);
+        src.connect(filter).connect(g).connect(audio.ctx.destination);
+        src.start();
+      }
+
+      function playStartSound() {
+        tone(330, 0.08, "square", 0.05, 660);
+        tone(660, 0.12, "triangle", 0.045, 990, 0.08);
+        tone(990, 0.16, "sine", 0.04, 1320, 0.18);
+      }
+
+      function playPickupSound() {
+        tone(760, 0.06, "triangle", 0.05, 1180);
+        tone(1280, 0.08, "sine", 0.035, 1680, 0.05);
+      }
+
+      function playShieldSound() {
+        tone(420, 0.12, "sine", 0.055, 840);
+        tone(840, 0.18, "triangle", 0.045, 1260, 0.08);
+      }
+
+      function playCrashSound() {
+        tone(150, 0.28, "sawtooth", 0.07, 52);
+        noise(0.24, 0.07, 420);
+      }
+
+      function playLevelSound() {
+        tone(520, 0.08, "square", 0.05, 780);
+        tone(780, 0.08, "square", 0.05, 1040, 0.08);
+        tone(1040, 0.18, "triangle", 0.05, 1560, 0.16);
+      }
+
+      function playGameOverSound() {
+        tone(260, 0.25, "sawtooth", 0.065, 120);
+        tone(120, 0.42, "sine", 0.055, 40, 0.18);
+        noise(0.3, 0.045, 300);
+      }
+
+      function addFloating(text, x, y, color = "#fff") {
+        state.floaters.push({ text, x, y, color, life: 1 });
+      }
+
+      function resetGame() {
+        state.mode = "playing";
+        state.score = 0;
+        state.level = 1;
+        state.distance = 0;
+        state.speed = 3.2;
+        state.spawnTimer = 0;
+        state.pickupTimer = 120;
+        state.shake = 0;
+        state.avalanche = 0;
+        state.avalancheCooldown = 650;
+        state.levelBanner = 120;
+        state.levelBannerText = "LEVEL 1";
+        state.crashFlash = 0;
+        state.snowOffset = 0;
+        state.obstacles = [];
+        state.pickups = [];
+        state.icePatches = [];
+        state.particles = [];
+        state.floaters = [];
+        state.laneGlow = [];
+        player.x = W / 2;
+        player.vx = 0;
+        player.shield = 0;
+        player.invuln = 0;
+        miniHud.textContent = "Level 1";
+        startScreen.classList.add("hidden");
+        gameOverScreen.classList.add("hidden");
+      }
+
+      function startGame() {
+        unlockAudio();
+        resetGame();
+        playStartSound();
+        if (audio.theme) audio.theme.play().catch(() => {});
+      }
+
+      function gameOver() {
+        if (state.mode !== "playing") return;
+        state.mode = "gameover";
+        state.shake = 18;
+        state.crashFlash = 1;
+        if (audio.theme) audio.theme.pause();
+        if (state.score > state.best) {
+          state.best = state.score;
+          localStorage.setItem("skiRushBest", String(state.best));
+        }
+        finalScore.textContent = Math.floor(state.score);
+        gameOverScreen.classList.remove("hidden");
+        playGameOverSound();
+      }
+
+      function rand(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function spawnObstacle() {
+        const lanes = [95, 190, 285, 380, 465];
+        let count = 1;
+        if (state.level >= 3 && Math.random() < 0.42) count = 2;
+        if (state.level >= 7 && Math.random() < 0.25) count = 3;
+        count = Math.min(count, lanes.length - 1);
+        const safeLane = Math.floor(Math.random() * lanes.length);
+        const available = lanes.map((x, lane) => ({ x, lane })).filter(l => l.lane !== safeLane).sort(() => Math.random() - 0.5);
+        for (let i = 0; i < count; i++) {
+          const typeRoll = Math.random();
+          const type = typeRoll < 0.46 ? "tree" : typeRoll < 0.74 ? "rock" : typeRoll < 0.9 ? "gate" : "bomb";
+          state.obstacles.push({
+            type,
+            x: available[i].x + rand(-18, 18),
+            y: -40 - i * 70,
+            w: type === "gate" ? 58 : type === "bomb" ? 32 : 34,
+            h: type === "gate" ? 30 : type === "bomb" ? 32 : 40,
+            spin: Math.random() * Math.PI
+          });
+        }
+      }
+
+      function spawnPickup() {
+        const shield = Math.random() < 0.28;
+        state.pickups.push({
+          type: shield ? "shield" : "star",
+          x: rand(44, W - 44),
+          y: -30,
+          r: shield ? 15 : 12,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+
+      function spawnIcePatch() {
+        if (state.level < 3) return;
+        state.icePatches.push({
+          x: rand(56, W - 120),
+          y: -90,
+          w: rand(72, 125),
+          h: rand(38, 58),
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+
+      function spawnSnowBurst(x, y, color = "#dffaff", amount = 14) {
+        for (let i = 0; i < amount; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const s = rand(1, 4.5);
+          state.particles.push({
+            x, y,
+            vx: Math.cos(a) * s,
+            vy: Math.sin(a) * s,
+            r: rand(1.5, 4),
+            color,
+            life: rand(0.35, 0.8)
+          });
+        }
+      }
+
+      function rectHit(a, b) {
+        return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
+      }
+
+      function circleHit(x1, y1, r1, x2, y2, r2) {
+        return Math.hypot(x1 - x2, y1 - y2) < r1 + r2;
+      }
+
+      function updateLevel() {
+        const nextLevel = 1 + Math.floor(state.distance / 650);
+        if (nextLevel > state.level) {
+          state.level = nextLevel;
+          state.speed += 0.36;
+          state.levelBanner = 120;
+          state.levelBannerText = `LEVEL ${state.level}`;
+          miniHud.textContent = `Level ${state.level}`;
+          addFloating("LEVEL UP!", W / 2, 135, "#ffe76b");
+          playLevelSound();
+        }
+      }
+
+      function updateAvalanche() {
+        state.avalancheCooldown--;
+        if (state.level >= 4 && state.avalancheCooldown <= 0 && state.avalanche <= 0) {
+          state.avalanche = 250 + state.level * 18;
+          state.avalancheCooldown = Math.max(430, 900 - state.level * 34);
+          state.levelBanner = 95;
+          state.levelBannerText = "AVALANCHE WARNING";
+          addFloating("AVALANCHE!", W / 2, 92, "#ff2cc1");
+          tone(160, 0.18, "sawtooth", 0.055, 80);
+          noise(0.18, 0.045, 520);
+        }
+        if (state.avalanche > 0) state.avalanche--;
+      }
+
+      function updateGame() {
+        if (state.mode !== "playing") return;
+
+        state.distance += state.speed;
+        state.score += Math.floor(1 + state.level * 0.08);
+        state.snowOffset += state.speed;
+        state.shake *= 0.84;
+        state.crashFlash *= 0.86;
+        if (state.levelBanner > 0) state.levelBanner--;
+        if (player.shield > 0) player.shield--;
+        if (player.invuln > 0) player.invuln--;
+
+        const steer = (keys.left ? -1 : 0) + (keys.right ? 1 : 0);
+        const onIce = state.icePatches.some(p => player.x > p.x && player.x < p.x + p.w && player.y > p.y && player.y < p.y + p.h);
+        const accel = onIce ? 0.42 : 0.9;
+        const drag = onIce ? 0.955 : 0.82;
+        player.vx += steer * accel;
+        player.vx *= drag;
+        player.vx = Math.max(-9.4, Math.min(9.4, player.vx));
+        player.x += player.vx;
+        player.x = Math.max(26, Math.min(W - 26, player.x));
+
+        if (onIce && Math.abs(player.vx) > 2.5 && Math.random() < 0.25) {
+          state.laneGlow.push({ x: player.x, y: player.y + 18, life: 0.35, color: "#85f7ff" });
+        }
+
+        updateLevel();
+        updateAvalanche();
+
+        const spawnRate = Math.max(22, 86 - state.level * 7);
+        state.spawnTimer--;
+        if (state.spawnTimer <= 0) {
+          spawnObstacle();
+          if (state.level >= 3 && Math.random() < Math.min(0.5, 0.12 + state.level * 0.035)) spawnIcePatch();
+          state.spawnTimer = spawnRate;
+        }
+
+        state.pickupTimer--;
+        if (state.pickupTimer <= 0) {
+          spawnPickup();
+          state.pickupTimer = Math.max(100, 190 - state.level * 7);
+        }
+
+        const fallSpeed = state.speed + (state.avalanche > 0 ? 1.25 : 0);
+        state.obstacles.forEach(o => {
+          o.y += fallSpeed;
+          o.spin += 0.03;
+        });
+        state.pickups.forEach(p => {
+          p.y += fallSpeed * 0.86;
+          p.phase += 0.12;
+        });
+        state.icePatches.forEach(p => {
+          p.y += fallSpeed * 0.94;
+          p.phase += 0.06;
+        });
+        state.particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.05;
+          p.life -= 0.025;
+        });
+        state.floaters.forEach(f => {
+          f.y -= 0.9;
+          f.life -= 0.018;
+        });
+        state.laneGlow.forEach(g => {
+          g.y += fallSpeed * 0.35;
+          g.life -= 0.035;
+        });
+
+        const skierBox = { x: player.x, y: player.y, w: player.width * 0.78, h: player.height * 0.8 };
+        for (const o of state.obstacles) {
+          if (player.invuln <= 0 && rectHit(skierBox, { x: o.x, y: o.y, w: o.w, h: o.h })) {
+            if (player.shield > 0) {
+              player.shield = 0;
+              player.invuln = 85;
+              state.shake = 10;
+              addFloating("SHIELD SAVE!", player.x, player.y - 28, "#85f7ff");
+              spawnSnowBurst(player.x, player.y, "#85f7ff", 18);
+              playShieldSound();
+              o.y = H + 99;
+            } else {
+              state.shake = 20;
+              spawnSnowBurst(player.x, player.y, "#ff2cc1", 28);
+              playCrashSound();
+              gameOver();
+              return;
+            }
+          }
+        }
+
+        for (const p of state.pickups) {
+          if (!p.taken && circleHit(player.x, player.y, 18, p.x, p.y, p.r)) {
+            p.taken = true;
+            if (p.type === "shield") {
+              player.shield = 520;
+              addFloating("SHIELD!", p.x, p.y, "#85f7ff");
+              playShieldSound();
+            } else {
+              state.score += 150 + state.level * 20;
+              addFloating("+STAR", p.x, p.y, "#ffe76b");
+              playPickupSound();
+            }
+            spawnSnowBurst(p.x, p.y, p.type === "shield" ? "#85f7ff" : "#ffe76b", 14);
+          }
+        }
+
+        state.obstacles = state.obstacles.filter(o => o.y < H + 80);
+        state.pickups = state.pickups.filter(p => p.y < H + 60 && !p.taken);
+        state.icePatches = state.icePatches.filter(p => p.y < H + 80);
+        state.particles = state.particles.filter(p => p.life > 0);
+        state.floaters = state.floaters.filter(f => f.life > 0);
+        state.laneGlow = state.laneGlow.filter(g => g.life > 0);
+      }
+
+      function drawMountainBackground() {
+        const sky = ctx.createLinearGradient(0, 0, 0, H);
+        sky.addColorStop(0, "#09143b");
+        sky.addColorStop(0.42, "#126cd8");
+        sky.addColorStop(1, "#e8fdff");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.save();
+        ctx.globalAlpha = 0.45;
+        for (let i = 0; i < 9; i++) {
+          const x = i * 72 + Math.sin(state.snowOffset * 0.006 + i) * 12;
+          const glow = ctx.createLinearGradient(x, 0, x + 70, H);
+          glow.addColorStop(0, "rgba(133,247,255,0.45)");
+          glow.addColorStop(1, "rgba(133,247,255,0)");
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x + 26, 0);
+          ctx.lineTo(x + 98, H);
+          ctx.lineTo(x + 48, H);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.38;
+        for (let i = 0; i < 3; i++) {
+          const shift = (state.snowOffset * (0.05 + i * 0.025)) % W;
+          ctx.fillStyle = i === 0 ? "rgba(10,35,91,0.26)" : "rgba(255,255,255,0.2)";
+          ctx.beginPath();
+          ctx.moveTo(-W + shift, 190 + i * 18);
+          ctx.lineTo(-W + shift + 92, 116 + i * 10);
+          ctx.lineTo(-W + shift + 196, 198 + i * 15);
+          ctx.lineTo(-W + shift + 292, 126 + i * 9);
+          ctx.lineTo(-W + shift + 410, 205 + i * 12);
+          ctx.lineTo(-W + shift + W * 2, 205 + i * 12);
+          ctx.lineTo(-W + shift + W * 2, 260 + i * 15);
+          ctx.lineTo(-W + shift, 260 + i * 15);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+
+        ctx.fillStyle = "#dffaff";
+        ctx.beginPath();
+        ctx.moveTo(0, 180);
+        ctx.lineTo(92, 70);
+        ctx.lineTo(178, 188);
+        ctx.lineTo(250, 86);
+        ctx.lineTo(350, 188);
+        ctx.lineTo(430, 72);
+        ctx.lineTo(520, 184);
+        ctx.lineTo(520, 520);
+        ctx.lineTo(0, 520);
+        ctx.closePath();
+        ctx.fill();
+
+        const slopeGlow = ctx.createRadialGradient(W / 2, H * 0.38, 20, W / 2, H * 0.58, 340);
+        slopeGlow.addColorStop(0, "rgba(255,255,255,0.62)");
+        slopeGlow.addColorStop(0.48, "rgba(133,247,255,0.18)");
+        slopeGlow.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = slopeGlow;
+        ctx.fillRect(0, 160, W, H - 160);
+
+        ctx.save();
+        ctx.globalAlpha = 0.46;
+        ctx.strokeStyle = "rgba(255,255,255,0.78)";
+        ctx.lineWidth = 2.4;
+        ctx.lineCap = "round";
+        for (let i = 0; i < 44; i++) {
+          const y = (i * 31 + state.snowOffset * (0.95 + (i % 4) * 0.14)) % (H + 80) - 60;
+          const x = (i * 97 + Math.sin(state.snowOffset * 0.01 + i) * 26) % W;
+          const len = 12 + (i % 5) * 7;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + len * 0.28, y + len);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.2;
+        ctx.strokeStyle = "rgba(32,246,255,0.55)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([18, 28]);
+        ctx.lineDashOffset = -state.snowOffset * 0.8;
+        for (let i = 0; i < 4; i++) {
+          const x = 118 + i * 94;
+          ctx.beginPath();
+          ctx.moveTo(x, 168);
+          ctx.bezierCurveTo(x - 18, 260, x + 18, 380, x - 8, 540);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.26;
+        ctx.fillStyle = "#ffffff";
+        for (let i = 0; i < 54; i++) {
+          const y = (i * 31 + state.snowOffset * (0.45 + (i % 3) * 0.08)) % H;
+          const x = (i * 73 + Math.sin(state.snowOffset * 0.007 + i) * 18) % W;
+          ctx.beginPath();
+          ctx.arc(x, y, 0.9 + (i % 3) * 0.45, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.2;
+        ctx.strokeStyle = "rgba(18,108,216,0.32)";
+        ctx.lineWidth = 18;
+        ctx.beginPath();
+        ctx.moveTo(118, 180);
+        ctx.bezierCurveTo(95, 275, 100, 405, 82, 540);
+        ctx.moveTo(402, 180);
+        ctx.bezierCurveTo(425, 275, 420, 405, 438, 540);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.strokeStyle = "rgba(255,44,193,0.35)";
+        ctx.lineWidth = 4;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#ff2cc1";
+        ctx.beginPath();
+        ctx.moveTo(84, 0);
+        ctx.quadraticCurveTo(52, 230, 76, H);
+        ctx.moveTo(436, 0);
+        ctx.quadraticCurveTo(468, 230, 444, H);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      const skierImg = new Image();
+      let skierImgReady = false;
+      let skierImgFailed = false;
+      skierImg.onload = () => { skierImgReady = true; };
+      skierImg.onerror = () => { skierImgFailed = true; };
+      skierImg.src = 'images/player_skier.png';
+
+      function drawFallbackSkier() {
+        // This fallback prevents the player from disappearing if the PNG path is wrong.
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = "#20f6ff";
+
+        // skis
+        ctx.strokeStyle = "#07142d";
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(-13, 16);
+        ctx.lineTo(-20, 34);
+        ctx.moveTo(13, 16);
+        ctx.lineTo(20, 34);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#85f7ff";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-13, 15);
+        ctx.lineTo(-20, 34);
+        ctx.moveTo(13, 15);
+        ctx.lineTo(20, 34);
+        ctx.stroke();
+
+        // body
+        ctx.fillStyle = "#ff2cc1";
+        ctx.beginPath();
+        ctx.roundRect(-11, -7, 22, 26, 8);
+        ctx.fill();
+
+        // head / helmet
+        ctx.fillStyle = "#0a1a45";
+        ctx.beginPath();
+        ctx.arc(0, -20, 13, 0, Math.PI * 2);
+        ctx.fill();
+
+        // goggles
+        ctx.fillStyle = "#85f7ff";
+        ctx.beginPath();
+        ctx.roundRect(-9, -23, 18, 7, 4);
+        ctx.fill();
+
+        // poles
+        ctx.strokeStyle = "#ffe76b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-16, -3);
+        ctx.lineTo(-27, 26);
+        ctx.moveTo(16, -3);
+        ctx.lineTo(27, 26);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+      }
+
+      function drawSkier() {
+        ctx.save();
+
+        ctx.translate(player.x, player.y);
+
+        const lean = player.vx * 0.028;
+        ctx.rotate(lean);
+
+        // shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath();
+        ctx.ellipse(0, 28, 12, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // shield glow
+        if (player.shield > 0) {
+          const pulse = 0.55 + Math.sin(Date.now() * 0.016) * 0.25;
+
+          ctx.strokeStyle = `rgba(133,247,255,${pulse})`;
+          ctx.lineWidth = 4;
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = "#85f7ff";
+
+          ctx.beginPath();
+          ctx.arc(0, 0, 34, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        if (skierImgReady && !skierImgFailed) {
+          ctx.drawImage(skierImg, -26, -26, 52, 52);
+        } else {
+          drawFallbackSkier();
+        }
+
+        ctx.restore();
+      }
+
+      function drawObstacle(o) {
+        ctx.save();
+        ctx.translate(o.x, o.y);
+        if (o.type === "tree") {
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = "#20f6ff";
+          ctx.fillStyle = "#053b34";
+          ctx.beginPath();
+          ctx.moveTo(0, -28);
+          ctx.lineTo(22, 18);
+          ctx.lineTo(-22, 18);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = "#7d4219";
+          ctx.fillRect(-5, 16, 10, 18);
+          ctx.strokeStyle = "#20f6ff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else if (o.type === "rock") {
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = "#ff2cc1";
+          ctx.fillStyle = "#50607c";
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 20, 16, o.spin * 0.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#e9feff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else {
+          ctx.shadowBlur = 16;
+          ctx.shadowColor = "#ffe76b";
+          ctx.strokeStyle = "#ffe76b";
+          ctx.lineWidth = 7;
+          ctx.beginPath();
+          ctx.moveTo(-25, 0);
+          ctx.lineTo(25, 0);
+          ctx.stroke();
+          ctx.fillStyle = "#ff2cc1";
+          ctx.fillRect(-29, -16, 8, 32);
+          ctx.fillRect(21, -16, 8, 32);
+        }
+        ctx.restore();
+      }
+
+      function drawPickup(p) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.phase);
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = p.type === "shield" ? "#85f7ff" : "#ffe76b";
+        if (p.type === "shield") {
+          ctx.strokeStyle = "#85f7ff";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = "rgba(133,247,255,0.22)";
+          ctx.fill();
+        } else {
+          ctx.fillStyle = "#ffe76b";
+          ctx.beginPath();
+          for (let i = 0; i < 10; i++) {
+            const a = -Math.PI / 2 + i * Math.PI / 5;
+            const r = i % 2 ? p.r * 0.45 : p.r;
+            const x = Math.cos(a) * r;
+            const y = Math.sin(a) * r;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawIcePatch(p) {
+        ctx.save();
+        ctx.globalAlpha = 0.78;
+        ctx.translate(p.x, p.y);
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = "#85f7ff";
+        ctx.fillStyle = "rgba(133,247,255,0.33)";
+        ctx.strokeStyle = "#85f7ff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(0, 0, p.w, p.h, 18);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.65)";
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(12 + i * 26, 12);
+          ctx.lineTo(34 + i * 31, p.h - 10);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function drawHud() {
+        ctx.save();
+        ctx.fillStyle = "rgba(0, 8, 26, 0.72)";
+        ctx.strokeStyle = "rgba(133,247,255,0.65)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(12, 12, W - 24, 48, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = "900 16px Trebuchet MS";
+        ctx.fillStyle = "#ffe76b";
+        ctx.textAlign = "left";
+        ctx.fillText(`SCORE ${Math.floor(state.score)}`, 28, 43);
+        ctx.fillStyle = "#85f7ff";
+        ctx.textAlign = "center";
+        ctx.fillText(`LEVEL ${state.level}`, W / 2, 43);
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "right";
+        ctx.fillText(`BEST ${Math.floor(state.best)}`, W - 28, 43);
+
+        if (player.shield > 0) {
+          ctx.fillStyle = "#85f7ff";
+          ctx.textAlign = "center";
+          ctx.fillText("SHIELD ACTIVE", W / 2, 76);
+        }
+
+        if (state.avalanche > 0) {
+          const pulse = 0.5 + Math.sin(Date.now() * 0.02) * 0.5;
+          ctx.fillStyle = `rgba(255,44,193,${0.18 + pulse * 0.16})`;
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = "#ffe76b";
+          ctx.font = "900 22px Trebuchet MS";
+          ctx.textAlign = "center";
+          ctx.shadowBlur = 16;
+          ctx.shadowColor = "#ff2cc1";
+          ctx.fillText("AVALANCHE WARNING", W / 2, 104);
+        }
+
+        if (state.levelBanner > 0) {
+          const scale = 1 + (state.levelBanner / 120) * 0.25;
+          ctx.save();
+          ctx.translate(W / 2, H / 2 - 80);
+          ctx.scale(scale, scale);
+          ctx.textAlign = "center";
+          ctx.font = "1000 34px Trebuchet MS";
+          ctx.lineWidth = 6;
+          ctx.strokeStyle = "#04142e";
+          ctx.fillStyle = state.levelBannerText.includes("AVALANCHE") ? "#ff2cc1" : "#ffe76b";
+          ctx.shadowBlur = 22;
+          ctx.shadowColor = ctx.fillStyle;
+          ctx.strokeText(state.levelBannerText, 0, 0);
+          ctx.fillText(state.levelBannerText, 0, 0);
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+
+      function render() {
+        ctx.save();
+        if (state.shake > 0) {
+          ctx.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
+        }
+
+        drawMountainBackground();
+        state.laneGlow.forEach(g => {
+          ctx.save();
+          ctx.globalAlpha = g.life;
+          ctx.strokeStyle = g.color;
+          ctx.lineWidth = 3;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = g.color;
+          ctx.beginPath();
+          ctx.moveTo(g.x - 18, g.y);
+          ctx.lineTo(g.x + 18, g.y + 10);
+          ctx.stroke();
+          ctx.restore();
+        });
+        state.icePatches.forEach(drawIcePatch);
+        state.pickups.forEach(drawPickup);
+        state.obstacles.forEach(drawObstacle);
+        drawSkier();
+
+        state.particles.forEach(p => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        state.floaters.forEach(f => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, f.life);
+          ctx.textAlign = "center";
+          ctx.font = `900 ${18 + (1 - f.life) * 10}px Trebuchet MS`;
+          ctx.lineWidth = 5;
+          ctx.strokeStyle = "#04142e";
+          ctx.fillStyle = f.color;
+          ctx.shadowBlur = 14;
+          ctx.shadowColor = f.color;
+          ctx.strokeText(f.text, f.x, f.y);
+          ctx.fillText(f.text, f.x, f.y);
+          ctx.restore();
+        });
+
+        if (state.crashFlash > 0.02) {
+          ctx.globalAlpha = state.crashFlash * 0.48;
+          ctx.fillStyle = "#ff2cc1";
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        drawHud();
+        ctx.restore();
+      }
+
+      function loop() {
+        updateGame();
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      function setTouch(el, key, on) {
+        keys[key] = on;
+        el.classList.toggle("active", on);
+      }
+
+      function bindTouch(el, key) {
+        el.addEventListener("pointerdown", e => { e.preventDefault(); setTouch(el, key, true); }, { passive: false });
+        el.addEventListener("pointerup", e => { e.preventDefault(); setTouch(el, key, false); }, { passive: false });
+        el.addEventListener("pointerleave", e => { e.preventDefault(); setTouch(el, key, false); }, { passive: false });
+        el.addEventListener("pointercancel", e => { e.preventDefault(); setTouch(el, key, false); }, { passive: false });
+      }
+
+      window.addEventListener("keydown", e => {
+        unlockAudio();
+        if (e.code === "ArrowLeft" || e.code === "KeyA") { keys.left = true; e.preventDefault(); }
+        if (e.code === "ArrowRight" || e.code === "KeyD") { keys.right = true; e.preventDefault(); }
+        if ((e.code === "Space" || e.code === "Enter") && state.mode !== "playing") { startGame(); e.preventDefault(); }
+      });
+
+      window.addEventListener("keyup", e => {
+        if (e.code === "ArrowLeft" || e.code === "KeyA") keys.left = false;
+        if (e.code === "ArrowRight" || e.code === "KeyD") keys.right = false;
+      });
+
+      document.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+      document.addEventListener("contextmenu", e => e.preventDefault());
+      startBtn.addEventListener("click", startGame);
+      restartBtn.addEventListener("click", startGame);
+      bindTouch(leftBtn, "left");
+      bindTouch(rightBtn, "right");
+
+      render();
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
